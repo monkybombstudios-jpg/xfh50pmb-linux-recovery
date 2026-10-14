@@ -1,0 +1,25 @@
+#!/bin/sh
+# Writes plain text to SD FAT partition only, never SPI NOR.
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+mkdir -p /mnt/boot
+mount -t vfat -o rw,uid=0,gid=0 /dev/mmcblk0p1 /mnt/boot || exit 1
+{
+  echo 'XFH-50PMB Linux Rescue - Boot Report'
+  echo 'Stage: init script reached from ext4 rootfs'
+  echo 'This file is evidence of successful kernel -> MMC -> userspace -> SD write.'
+  echo '--- uptime ---'; cat /proc/uptime
+  echo '--- kernel ---'; uname -a
+  echo '--- cmdline ---'; cat /proc/cmdline
+  echo '--- memory ---'; cat /proc/meminfo
+  echo '--- mounts ---'; cat /proc/mounts
+  echo '--- block ---'; cat /proc/partitions
+  echo '--- spi mtd ---'; cat /proc/mtd 2>/dev/null || true
+  echo '--- usb ---'; ls -l /sys/bus/usb/devices/ 2>/dev/null || true
+  echo '--- network ---'; ls /sys/class/net 2>/dev/null || true
+  echo '--- framebuffer ---'; ls /sys/class/graphics 2>/dev/null || true
+  echo '--- kernel log (last 150 lines) ---'; dmesg | tail -n 150
+} > /mnt/boot/BOOT_REPORT.TXT
+sync
+# Persist raw log too for more detailed analysis.
+dmesg > /mnt/boot/KERNEL_LOG.TXT 2>/dev/null || true
+sync

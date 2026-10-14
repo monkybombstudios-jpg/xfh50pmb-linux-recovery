@@ -1,0 +1,17 @@
+#!/bin/sh
+# IMPORTANT: DO NOT RUN until BOOT_REPORT.TXT confirms storage and mtd layout.
+set -eu
+mkdir -p /mnt/boot
+mountpoint -q /mnt/boot || mount -t vfat /dev/mmcblk0p1 /mnt/boot
+NODE=/dev/mtd0ro
+[ -c "$NODE" ] || { echo 'No read-only MTD device'; exit 1; }
+SIZE="$(cat /sys/class/mtd/mtd0/size)"
+[ "$SIZE" = '8388608' ] || { echo "Wrong flash size: $SIZE"; exit 1; }
+for I in 1 2; do
+  dd if="$NODE" of="/mnt/boot/XFH_2026_COPY${I}.bin" bs=32768 count=256 || exit 1
+  sync
+done
+cmp /mnt/boot/XFH_2026_COPY1.bin /mnt/boot/XFH_2026_COPY2.bin
+sha256sum /mnt/boot/XFH_2026_COPY*.bin > /mnt/boot/XFH_SHA256.txt
+sync
+echo 'TWO VERIFIED READ-ONLY COPIES COMPLETE'

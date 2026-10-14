@@ -1,0 +1,44 @@
+name: Build XFH Linux Rescue SD Image
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential bc bison flex \
+            libssl-dev libncurses-dev libelf-dev cpio rsync file wget unzip \
+            python3 git perl xz-utils gawk sed patch tar
+      - name: Fetch pinned Buildroot 2025.02.1
+        run: |
+          curl -fL --retry 3 -o /tmp/br.tar.xz https://buildroot.org/downloads/buildroot-2025.02.1.tar.xz
+          mkdir -p "$GITHUB_WORKSPACE/br"
+          tar -xJf /tmp/br.tar.xz -C "$GITHUB_WORKSPACE/br" --strip-components=1
+      - name: Configure and build Linux, U-Boot, rootfs, and full SD image
+        run: |
+          make -C br BR2_EXTERNAL="$GITHUB_WORKSPACE" O="$GITHUB_WORKSPACE/output" xfh_recovery_defconfig
+          make -C br BR2_EXTERNAL="$GITHUB_WORKSPACE" O="$GITHUB_WORKSPACE/output" -j2
+      - name: Ensure complete and structurally valid bootable media
+        run: |
+          python3 board/xfh/check-image.py output/images/sdcard.img
+          test -s output/images/boot.scr
+          test -s output/images/zImage
+          test -s output/images/rootfs.ext4
+          test -s output/images/suniv-f1c100s-licheepi-nano.dtb
+          cd output/images && sha256sum sdcard.img > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: XFH_LINUX_RESCUE_SD_IMAGE
+          path: |
+            output/images/sdcard.img
+            output/images/SHA256SUMS.txt
+            output/images/zImage
+            output/images/suniv-f1c100s-licheepi-nano.dtb
+          retention-days: 7
+          if-no-files-found: error
