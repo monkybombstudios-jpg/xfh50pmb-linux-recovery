@@ -1,1 +1,3 @@
-# No external packages for XFH rescue stage one.
+menu "XFH recovery applications"
+source "$(BR2_EXTERNAL_XFHRECOVERY_PATH)/package/xfh-ui/Config.in"
+endmenu

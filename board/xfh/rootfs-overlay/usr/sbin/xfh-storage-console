@@ -1,0 +1,12 @@
+#!/bin/sh
+# Read-only fallback for serial console: no mount/write actions here.
+while :; do
+ printf '\nXFH Recovery | Storage selection\n1 SD card  2 USB  3 SPI (read-only)  q Quit\n'
+ read -r choice || exit 0
+ case "$choice" in
+  1) grep mmcblk /proc/partitions || echo 'No SD detected' ;;
+  2) grep -E 'sd[a-z]' /proc/partitions || echo 'No USB block device detected' ;;
+  3) cat /proc/mtd 2>/dev/null || echo 'No SPI MTD device found' ;;
+  q) exit 0 ;;
+ esac
+done

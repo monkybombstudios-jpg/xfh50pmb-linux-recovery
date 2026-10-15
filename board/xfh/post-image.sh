@@ -5,7 +5,7 @@ ROOT="${BR2_EXTERNAL_XFHRECOVERY_PATH}"
 : "${HOST_DIR:?}"
 
 # Fails instead of producing an incomplete SD image.
-for f in zImage suniv-f1c100s-licheepi-nano.dtb rootfs.ext4 u-boot-sunxi-with-spl.bin; do
+for f in zImage suniv-f1c100s-xfh50pmb.dtb rootfs.ext4 u-boot-sunxi-with-spl.bin; do
     test -s "${BINARIES_DIR}/${f}" || { echo "Missing ${f}" >&2; exit 1; }
 done
 "${HOST_DIR}/bin/mkimage" -A arm -O linux -T script -C none \

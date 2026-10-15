@@ -1,0 +1,12 @@
+#!/bin/sh
+# Only begin the UI after diagnostic init has had an opportunity to write logs.
+case "$1" in
+start)
+ if [ -c /dev/fb0 ]; then
+    /usr/sbin/xfh-ui </dev/console >/dev/console 2>&1 &
+ else
+    echo 'XFH: framebuffer unavailable; read-only storage menu on console' >/dev/console
+    /usr/sbin/xfh-storage-console >/dev/console 2>&1 &
+ fi
+ ;;
+esac

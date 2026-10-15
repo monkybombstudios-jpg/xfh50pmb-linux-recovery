@@ -33,7 +33,7 @@ jobs:
           test -s output/images/boot.scr
           test -s output/images/zImage
           test -s output/images/rootfs.ext4
-          test -s output/images/suniv-f1c100s-licheepi-nano.dtb
+          test -s output/images/suniv-f1c100s-xfh50pmb.dtb
           cd output/images && sha256sum sdcard.img > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
@@ -42,6 +42,6 @@ jobs:
             output/images/sdcard.img
             output/images/SHA256SUMS.txt
             output/images/zImage
-            output/images/suniv-f1c100s-licheepi-nano.dtb
+            output/images/suniv-f1c100s-xfh50pmb.dtb
           retention-days: 7
           if-no-files-found: error

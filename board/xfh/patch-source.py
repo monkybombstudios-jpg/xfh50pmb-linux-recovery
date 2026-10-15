@@ -81,7 +81,7 @@ CONFIG_BOOTCOMMAND="mmc dev 0; if fatload mmc 0:1 0x81700000 boot.scr; then sour
 CONFIG_CMD_MMC=y
 CONFIG_CMD_FAT=y
 CONFIG_CMD_BOOTZ=y
-CONFIG_SPL_MMC=y
+CONFIG_SPL_MMC=y\nCONFIG_FAT_WRITE=y
 ''')
     print('XFH U-Boot source 1-bit SD/boot.cmd modification: PASS')
 else:

@@ -1,0 +1,6 @@
+config BR2_PACKAGE_XFH_UI
+    bool "XFH framebuffer storage selector"
+    depends on BR2_USE_MMU
+    help
+      A small, read-only framebuffer storage selection panel with
+      terminal fallback. Does not erase, mount writable or program flash.
