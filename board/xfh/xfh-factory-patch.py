@@ -28,6 +28,7 @@ elif kind=='uboot':
     s=s.replace('model = "Lichee Pi Nano"','model = "XFH-50pMB reference"')
     s=s.replace('compatible = "licheepi,licheepi-nano", "allwinner,suniv-f1c100s";',
                 'compatible = "xfh,50pmb-reference", "allwinner,suniv-f1c100s";')
+    s=s.replace('spi-max-frequency = <40000000>;', 'spi-max-frequency = <10000000>;')
     new.write_text(s)
     conf=root/'configs/xfh50pmb_defconfig'
     s=(root/'configs/licheepi_nano_defconfig').read_text()
@@ -38,7 +39,7 @@ elif kind=='uboot':
     # NOTE: do NOT assume factory 156MHz SDR clock is safe for a different 2026 board.
     # Keep the upstream boot0 DRAM logic until it is independently confirmed.
     # Read-only SPI flash probe/extraction commands for XFH V3.
-    s += "\nCONFIG_CMD_SF=y\nCONFIG_SPI_FLASH=y\nCONFIG_FAT_WRITE=y\n"
+    s += "\nCONFIG_CMD_SF=y\nCONFIG_SPI_FLASH=y\nCONFIG_SPI=y\nCONFIG_DM_SPI=y\nCONFIG_SPI_SUNXI=y\nCONFIG_FAT_WRITE=y\nCONFIG_CMD_GPIO=y\nCONFIG_CMD_DM=y\n"
     conf.write_text(s)
     print('XFH U-Boot board defconfig created',conf)
 else:raise SystemExit('usage: xfh-factory-patch.py linux|uboot /source')
