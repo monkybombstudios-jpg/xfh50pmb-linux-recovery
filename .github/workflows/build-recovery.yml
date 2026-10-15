@@ -23,6 +23,9 @@ jobs:
       - name: Configure and build Linux, U-Boot, rootfs, and full SD image
         run: |
           make -C br BR2_EXTERNAL="$GITHUB_WORKSPACE" O="$GITHUB_WORKSPACE/output" xfh_recovery_defconfig
+          grep -qx "BR2_KERNEL_HEADERS_AS_KERNEL=y" output/.config
+          grep -qx "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_6=y" output/.config
+          grep -qx "BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_6=y" output/.config
           make -C br BR2_EXTERNAL="$GITHUB_WORKSPACE" O="$GITHUB_WORKSPACE/output" -j2
       - name: Ensure complete and structurally valid bootable media
         run: |
