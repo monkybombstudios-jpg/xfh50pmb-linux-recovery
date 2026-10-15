@@ -37,6 +37,8 @@ elif kind=='uboot':
         s+='\nCONFIG_DEFAULT_DEVICE_TREE="suniv-f1c100s-xfh50pmb"\n'
     # NOTE: do NOT assume factory 156MHz SDR clock is safe for a different 2026 board.
     # Keep the upstream boot0 DRAM logic until it is independently confirmed.
+    # Read-only SPI flash probe/extraction commands for XFH V3.
+    s += "\nCONFIG_CMD_SF=y\nCONFIG_SPI_FLASH=y\nCONFIG_FAT_WRITE=y\n"
     conf.write_text(s)
     print('XFH U-Boot board defconfig created',conf)
 else:raise SystemExit('usage: xfh-factory-patch.py linux|uboot /source')
