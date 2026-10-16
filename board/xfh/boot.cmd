@@ -1,116 +1,190 @@
-# XFH V6 read-only. SPL, DRAM and MMC config unchanged.
-setenv xfhstage 'V6 executing from MMC'
+# XFH V7: read-only MMIO snapshots with driver operation between; no gpio writes, no sf write/erase.
+setenv xfhstage 'V7 diagnostic script entered; before snapshots'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 00_START.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 00_V7_START.TXT ${filesize}
 fi
 
-setenv xfh_found 0
-setenv xfhstage 'Probing factory SPI0 CS0 PC0 PC1 PC2 PC3'
+# Read 1024 bytes from 0x01c20000; never writes to MMIO.
+if cp.l 0x01c20000 0x81000000 100; then
+ if fatwrite mmc 0:1 0x81000000 B_CC.BIN 400; then
+setenv xfhstage 'B_CC snapshot saved'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 01_PROBE.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_CC_Y.TXT ${filesize}
 fi
 
-if sf probe 0:0 500000; then
-setenv xfhstage 'SPI0 CS0 probe succeeded'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 02_SPI_Y.TXT ${filesize}
-fi
-
-setenv xfh_found 1
-else
-setenv xfhstage 'SPI0 CS0 probe failed'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 02_SPI_N.TXT ${filesize}
-fi
-
-fi
-if test "${xfh_found}" = "1"; then
- if sf read 0x81000000 0 0x1000; then
-  if fatwrite mmc 0:1 0x81000000 XFH_HEAD.BIN 0x1000; then
-   if fatload mmc 0:1 0x81800000 XFH_HEAD.BIN; then
-    if cmp.b 0x81000000 0x81800000 0x1000; then
-setenv xfhstage '4096-byte read saved and compared'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 03_READ_Y.TXT ${filesize}
-fi
-
-    else
-setenv xfhstage 'Mismatch after SD readback'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 03_COMPARE_N.TXT ${filesize}
-fi
-
-    fi
-   else
-setenv xfhstage 'SD readback failed'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 03_SDREAD_N.TXT ${filesize}
-fi
-
-   fi
-  else
-setenv xfhstage 'SD write failed'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 03_SDWRITE_N.TXT ${filesize}
-fi
-
-  fi
  else
-setenv xfhstage 'SPI read failed'
+setenv xfhstage 'B_CC FAT write failed'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 03_SPIREAD_N.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_CC_N.TXT ${filesize}
 fi
 
  fi
-fi
-setenv xfhstage 'V6 scan finished; LED follows'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 89_SCAN_END.TXT ${filesize}
-fi
-
-# GPIO names from vendor FEX. GPIO driver and physical polarity unverified.
-if gpio clear PD20; then
-setenv xfhstage 'PD20 clear accepted'
-if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 90_RED_Y.TXT ${filesize}
-fi
-
 else
-setenv xfhstage 'PD20 clear failed'
+setenv xfhstage 'B_CC MMIO read failed'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 90_RED_N.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_CC_N.TXT ${filesize}
 fi
 
 fi
-if gpio clear PE4; then
-setenv xfhstage 'PE4 clear accepted'
+
+# Read 1024 bytes from 0x01c20800; never writes to MMIO.
+if cp.l 0x01c20800 0x81000000 100; then
+ if fatwrite mmc 0:1 0x81000000 B_GPIO.BIN 400; then
+setenv xfhstage 'B_GPIO snapshot saved'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 91_BLUE_Y.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_GPIO_Y.TXT ${filesize}
 fi
 
+ else
+setenv xfhstage 'B_GPIO FAT write failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 B_GPIO_N.TXT ${filesize}
+fi
+
+ fi
 else
-setenv xfhstage 'PE4 clear failed'
+setenv xfhstage 'B_GPIO MMIO read failed'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 91_BLUE_N.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_GPIO_N.TXT ${filesize}
 fi
 
 fi
-if gpio set PD21; then
-setenv xfhstage 'PD21 set accepted; color not verified'
+
+# Read 256 bytes from 0x01c05000; never writes to MMIO.
+if cp.l 0x01c05000 0x81000000 40; then
+ if fatwrite mmc 0:1 0x81000000 B_SPI.BIN 100; then
+setenv xfhstage 'B_SPI snapshot saved'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 92_GREEN_Y.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_SPI_Y.TXT ${filesize}
 fi
 
+ else
+setenv xfhstage 'B_SPI FAT write failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 B_SPI_N.TXT ${filesize}
+fi
+
+ fi
 else
-setenv xfhstage 'PD21 set failed'
+setenv xfhstage 'B_SPI MMIO read failed'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 92_GREEN_N.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 B_SPI_N.TXT ${filesize}
 fi
 
 fi
-setenv xfhstage 'V6 finished; POWER OFF before removing SD'
+
+# Read-only sf probe; PC0..PC3 may be reconfigured by built-in driver.
+setenv xfhstage 'V7 SPI probe starting'
 if env export -t 0x82000000 xfhstage; then
- fatwrite mmc 0:1 0x82000000 99_END.TXT ${filesize}
+ fatwrite mmc 0:1 0x82000000 10_SPI_BEGIN.TXT ${filesize}
 fi
 
-echo V6 finished: power OFF before removing SD
+if sf probe 0:0 500000; then
+setenv xfhstage 'V7 SPI flash successfully probed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 11_SPI_Y.TXT ${filesize}
+fi
+
+if sf read 0x81000000 0 0x1000; then
+ if fatwrite mmc 0:1 0x81000000 V7_HEAD.BIN 0x1000; then
+setenv xfhstage 'V7 flash 4KB sample saved'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 12_READ_Y.TXT ${filesize}
+fi
+
+ else
+setenv xfhstage 'V7 FAT save failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 12_READ_N.TXT ${filesize}
+fi
+
+ fi
+else
+setenv xfhstage 'V7 sf read failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 12_READ_N.TXT ${filesize}
+fi
+
+fi
+else
+setenv xfhstage 'V7 SPI flash probe failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 11_SPI_N.TXT ${filesize}
+fi
+
+fi
+# Read 1024 bytes from 0x01c20000; never writes to MMIO.
+if cp.l 0x01c20000 0x81000000 100; then
+ if fatwrite mmc 0:1 0x81000000 A_CC.BIN 400; then
+setenv xfhstage 'A_CC snapshot saved'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_CC_Y.TXT ${filesize}
+fi
+
+ else
+setenv xfhstage 'A_CC FAT write failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_CC_N.TXT ${filesize}
+fi
+
+ fi
+else
+setenv xfhstage 'A_CC MMIO read failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_CC_N.TXT ${filesize}
+fi
+
+fi
+
+# Read 1024 bytes from 0x01c20800; never writes to MMIO.
+if cp.l 0x01c20800 0x81000000 100; then
+ if fatwrite mmc 0:1 0x81000000 A_GPIO.BIN 400; then
+setenv xfhstage 'A_GPIO snapshot saved'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_GPIO_Y.TXT ${filesize}
+fi
+
+ else
+setenv xfhstage 'A_GPIO FAT write failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_GPIO_N.TXT ${filesize}
+fi
+
+ fi
+else
+setenv xfhstage 'A_GPIO MMIO read failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_GPIO_N.TXT ${filesize}
+fi
+
+fi
+
+# Read 256 bytes from 0x01c05000; never writes to MMIO.
+if cp.l 0x01c05000 0x81000000 40; then
+ if fatwrite mmc 0:1 0x81000000 A_SPI.BIN 100; then
+setenv xfhstage 'A_SPI snapshot saved'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_SPI_Y.TXT ${filesize}
+fi
+
+ else
+setenv xfhstage 'A_SPI FAT write failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_SPI_N.TXT ${filesize}
+fi
+
+ fi
+else
+setenv xfhstage 'A_SPI MMIO read failed'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 A_SPI_N.TXT ${filesize}
+fi
+
+fi
+
+setenv xfhstage 'V7 complete; no LED GPIO toggles; power OFF before SD removal'
+if env export -t 0x82000000 xfhstage; then
+ fatwrite mmc 0:1 0x82000000 99_V7_END.TXT ${filesize}
+fi
+
+echo V7 complete; turn power OFF before SD removal
