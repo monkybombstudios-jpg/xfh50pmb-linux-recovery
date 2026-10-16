@@ -14,7 +14,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential bc bison flex \
             libssl-dev libncurses-dev libelf-dev cpio rsync file wget unzip \
-            python3 git perl xz-utils gawk sed patch tar
+            python3 git perl xz-utils gawk sed patch tar device-tree-compiler
       - name: Fetch pinned Buildroot 2025.02.1
         run: |
           curl -fL --retry 3 -o /tmp/br.tar.xz https://buildroot.org/downloads/buildroot-2025.02.1.tar.xz
