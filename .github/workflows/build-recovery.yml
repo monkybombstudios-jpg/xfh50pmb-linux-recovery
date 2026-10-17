@@ -37,6 +37,11 @@ jobs:
           name: XFH_V6_HARDWARE_REPORT
           path: output/HARDWARE_BUILD_REPORT.txt
           if-no-files-found: warn
+      - name: Verify V10 EON flash ID was compiled
+        run: |
+          grep -qx 'CONFIG_SPI_FLASH_EON=y' output/build/uboot-*/.config
+          grep -q '0x1c7017' output/build/uboot-*/drivers/mtd/spi/spi-nor-ids.c
+          grep -q 'en25qh64-xfh' output/build/uboot-*/drivers/mtd/spi/spi-nor-ids.c
       - name: Ensure complete and structurally valid bootable media
         run: |
           python3 board/xfh/check-image.py output/images/sdcard.img
