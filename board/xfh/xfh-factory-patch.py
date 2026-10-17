@@ -45,5 +45,7 @@ elif kind=='uboot':
     # Read-only SPI flash probe/extraction commands for XFH V3.
     s += "\nCONFIG_CMD_SF=y\nCONFIG_SPI_FLASH=y\nCONFIG_SPI=y\nCONFIG_DM_SPI=y\nCONFIG_SPI_SUNXI=y\nCONFIG_FAT_WRITE=y\nCONFIG_CMD_GPIO=y\nCONFIG_CMD_DM=y\nCONFIG_DM=y\nCONFIG_DM_GPIO=y\n"
     conf.write_text(s)
+    import subprocess
+    subprocess.run([sys.executable, str(Path(__file__).parent/'patch_spi_trace.py'), str(root)], check=True)
     print('XFH U-Boot board defconfig created',conf)
 else:raise SystemExit('usage: xfh-factory-patch.py linux|uboot /source')
