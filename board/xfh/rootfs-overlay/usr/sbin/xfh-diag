@@ -10,7 +10,10 @@ mount -t vfat -o rw,uid=0,gid=0 /dev/mmcblk0p1 /mnt/boot || exit 1
   echo '--- uptime ---'; cat /proc/uptime
   echo '--- kernel ---'; uname -a
   echo '--- cmdline ---'; cat /proc/cmdline
+  echo '--- CPU ---'; cat /proc/cpuinfo
   echo '--- memory ---'; cat /proc/meminfo
+  echo '--- memory device tree ---'; ls -l /proc/device-tree/memory* 2>/dev/null || true
+  echo '--- SoC device IDs ---'; find /sys/devices/soc0 -maxdepth 1 -type f -exec sh -c 'echo "$1"; cat "$1"' sh {} \; 2>/dev/null || true
   echo '--- mounts ---'; cat /proc/mounts
   echo '--- block ---'; cat /proc/partitions
   echo '--- spi mtd ---'; cat /proc/mtd 2>/dev/null || true
